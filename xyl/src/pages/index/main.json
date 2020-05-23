@@ -1,0 +1,13 @@
+{
+    
+    "usingComponents": {
+        "van-icon": "/static/vant/icon/index",
+        "van-sidebar": "/static/vant/sidebar/index",
+        "van-sidebar-item": "/static/vant/sidebar-item/index",
+        "van-card": "/static/vant/card/index",
+        "van-dropdown-menu": "/static/vant/dropdown-menu/index",
+        "van-dropdown-item": "/static/vant/dropdown-item/index"
+    },
+    "navigationBarTitleText": "源升建材"
+}
+  
