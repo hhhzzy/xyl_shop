@@ -1,1 +1,1 @@
-export const imgBaseUrl = 'http://localhost:3005/';
+export const imgBaseUrl = 'https://www.ysjiancai.cn/';

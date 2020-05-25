@@ -7,16 +7,16 @@
             <TabPane label="二类目录" name="type_two">
 
             </TabPane>
-            <!-- <TabPane label="三类目录" name="type_three">
+            <TabPane label="三类目录" name="type_three">
 
-            </TabPane> -->
+            </TabPane>
         </Tabs>
         <div>
             <div style="margin-bottom:15px;">
                 <Button type="primary" @click="gotoAdd()">新增</Button>
             </div>
             <Table border v-if="typeName == 'type_one'"  :columns="tableOneColumn" :data="tableData"></Table>
-            <Table border v-else-if="typeName == 'type_two'"  :columns="tableTwoColumn" :data="tableData"></Table>
+            <Table border v-else-if="typeName == 'type_two'"  :columns="tableTwoColumn" :data="tableTwoData"></Table>
             <Modal
                 v-model="visiable"
                 :title="titleType"
@@ -35,8 +35,18 @@
                         <FormItem label="二类目录" prop="typeTwo" v-if="typeName == 'type_two'">
                             <Input v-model="formValidate.typeTwo" ></Input>
                         </FormItem>
+                         <FormItem label="一类目录" prop="typeOne" v-if="typeName == 'type_three'">
+                            <Select v-model="newTypeOne" @on-change="ChangeTypeOne" :label-in-value="true" >
+                                <Option v-for="(item,index) in typeOneArr" :value="item._id" :key="index">{{ item.typeOne }}</Option>
+                            </Select>
+                        </FormItem>
+                        <FormItem label="二类目录" prop="typeTwo" v-if="typeName == 'type_three'">
+                             <Select v-model="newTypeOne" @on-change="ChangeTypeOne" :label-in-value="true" >
+                                <Option v-for="(item,index) in typeTwoArr" :value="item._id" :key="index">{{ item.typeOne }}</Option>
+                            </Select>
+                        </FormItem>
                         <FormItem label="三类目录" prop="content" v-if="typeName == 'type_three'">
-                            <Input  type="textarea" :rows="4" v-model="formValidate.content" ></Input>
+                            <Input v-model="formValidate.typeThree" ></Input>
                         </FormItem>
                     </Form>
             </Modal>
@@ -44,7 +54,7 @@
     </div>
 </template>
 <script>
-import { getDictionary, upsertDictionary, delDic, delTypeTwo } from '@/api/dictionary'
+import { upsertTypeOne, getTypeOne, upsertTypeTwo, delTypeOne, delTypeTwo, getTypeTwo } from '@/api/dictionary'
 // import { constants, truncate } from 'fs'
 import { formatDateTime } from '@/global/global'
 // import { fail } from 'assert'
@@ -72,6 +82,7 @@ export default {
             loading: true,
             titleType: '新增',
             tableData: [],
+            tableTwoData: [],
             tableOneColumn: [
                 {
                     title: '序号',
@@ -127,10 +138,10 @@ export default {
                                             content: '<p>是否删除该条数据？删除后不可恢复！</p>',
                                             okText: '确定',
                                             onOk: () => {
-                                                delDic(params.row._id).then(res => {
+                                                delTypeOne(params.row._id).then(res => {
                                                     if (!res.data.code) {
                                                         this.$Message.success('删除成功!')
-                                                        this.getData()
+                                                        this.getTypeOneData()
                                                     }
                                                 })
                                             },
@@ -173,23 +184,24 @@ export default {
                     align: 'center',
                     render: (h, params) => {
                         return h('div', [
-                            // h('Button', {
-                            //     props: {
-                            //         type: 'primary',
-                            //         size: 'small'
-                            //     },
-                            //     style: {
-                            //         marginRight: '5px'
-                            //     },
-                            //     on: {
-                            //         click: () => {
-                            //             this.visiable = true
-                            //             this.titleType = '编辑'
-                            //             this.formValidate = Object.assign({}, params.row)
-                            //             this.formValidate.content = String(this.formValidate.content)
-                            //         }
-                            //     }
-                            // }, '修改'),
+                            h('Button', {
+                                props: {
+                                    type: 'primary',
+                                    size: 'small'
+                                },
+                                style: {
+                                    marginRight: '5px'
+                                },
+                                on: {
+                                    click: () => {
+                                        this.visiable = true
+                                        this.titleType = '编辑'
+                                        this.formValidate = Object.assign({}, params.row)
+                                        console.log(params)
+                                        this.newTypeOne = params.row.typeOneId
+                                    }
+                                }
+                            }, '修改'),
                             h('Button', {
                                 props: {
                                     type: 'error',
@@ -202,10 +214,10 @@ export default {
                                             content: '<p>是否删除该条数据？删除后不可恢复！</p>',
                                             okText: '确定',
                                             onOk: () => {
-                                                delTypeTwo({id: params.row._id, name: params.row.typeTwo}).then(res => {
+                                                delTypeTwo(params.row._id).then(res => {
                                                     if (!res.data.code) {
                                                         this.$Message.success('删除成功!')
-                                                        this.getData()
+                                                        this.GetTypeTwo()
                                                     }
                                                 })
                                             },
@@ -220,16 +232,21 @@ export default {
             ],
             typeName: 'type_one',
             typeOneArr: [],
-            newTypeOne: ''
+            newTypeOne: '',
+            typeTwoArr: []
         }
     },
     methods: {
         GetType (value) {
             this.typeName = value
-            this.getData()
+            this.getTypeOneData()
+            if (value === 'type_two') {
+                this.GetTypeTwo()
+            }
             this.newTypeOne = ''
         },
         ChangeTypeOne (value) {
+            if (!value) return
             this.formValidate._id = value.value
             this.formValidate.typeOne = value.label
         },
@@ -247,22 +264,41 @@ export default {
                             typeOne: this.formValidate.typeOne,
                             _id: this.formValidate._id
                         }
-                    } else {
-                        formData = Object.assign({}, this.formValidate)
-                    }
-                    upsertDictionary(formData).then(res => {
-                        if (!res.data.code) {
-                            if (formData._id) {
-                                this.$Message.success('修改成功！')
-                            } else {
-                                this.$Message.success('新增成功！')
+                        // 新增修改一类目录
+                        upsertTypeOne(formData).then(res => {
+                            if (!res.data.code) {
+                                if (formData._id) {
+                                    this.$Message.success('修改成功！')
+                                } else {
+                                    this.$Message.success('新增成功！')
+                                }
                             }
-                            // 更新字典
-                            this.$store.dispatch('getDic')
+                            this.getTypeOneData()
+                            this.visiable = false
+                        })
+                    } else if (this.typeName === 'type_two') {
+                        console.log(this.formValidate)
+                        formData = {
+                            typeOne: this.formValidate.typeOne,
+                            typeOneId: this.formValidate.typeOneId,
+                            typeTwo: this.formValidate.typeTwo,
+                            _id: this.formValidate._id ? this.formValidate._id : null
                         }
-                        this.getData()
-                        this.visiable = false
-                    })
+                        console.log(formData)
+                        // 新增修改二类目录
+                        upsertTypeTwo(formData).then(res => {
+                            if (!res.data.code) {
+                                if (formData._id) {
+                                    this.$Message.success('修改成功！')
+                                } else {
+                                    this.$Message.success('新增成功！')
+                                }
+                            }
+                            this.newTypeOne = ''
+                            this.GetTypeTwo()
+                            this.visiable = false
+                        })
+                    }
                 } else {
                     setTimeout(() => {
                         this.loading = false
@@ -276,40 +312,32 @@ export default {
         cancelModel () {
             this.visiable = false
         },
-        getData () {
+        getTypeOneData () {
             this.typeOneArr = []
             this.tableData = []
-            // 获取数据
-            getDictionary().then(res => {
-                // 把一级目录变成数组
-                res.data.data.map(item => {
-                    this.typeOneArr.push({
-                        '_id': item._id,
-                        'typeOne': item.typeOne
-                    })
-                })
-                if (this.typeName === 'type_two') {
+            // 获取一类目录
+            getTypeOne().then(res => {
+                this.tableData = res.data.data
+                if (res.data.data) {
                     res.data.data.forEach(item => {
-                        item.typeTwo.forEach(ele => {
-                            if (ele) {
-                                this.tableData.push({
-                                    'typeOne': item.typeOne,
-                                    'typeTwo': ele,
-                                    '_id': item._id,
-                                    'created': item.created,
-                                    'updated': item.updated
-                                })
-                            }
+                        this.typeOneArr.push({
+                            _id: item._id,
+                            typeOne: item.typeOne
                         })
                     })
-                } else {
-                    this.tableData = res.data.data
                 }
+            })
+        },
+        GetTypeTwo () {
+            this.tableTwoData = []
+            getTypeTwo().then(res => {
+                console.log(res)
+                this.tableTwoData = res.data.data ? res.data.data : []
             })
         }
     },
     created () {
-        this.getData()
+        this.getTypeOneData()
     }
 }
 </script>

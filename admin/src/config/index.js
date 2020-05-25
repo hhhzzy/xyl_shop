@@ -14,9 +14,9 @@ export default {
    */
     baseUrl: {
         dev: 'http://localhost:3005/api/',
-        pro: 'http://hoom.xin:3005/api/',
+        pro: 'https://www.ysjiancai.cn/api/',
         imgDev: 'http://localhost:3005/',
-        imgPro: 'http://hoom.xin:3005/api/'
+        imgPro: 'https://www.ysjiancai.cn/'
     },
     /**
    * @description 默认打开的首页的路由name值，默认为home

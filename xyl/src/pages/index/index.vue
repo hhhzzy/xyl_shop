@@ -1,37 +1,36 @@
 <template>
   <div class="index-box">
       <div class="info-box">
-          <p class="name">重庆源升五金建材配送</p>
+          <p class="name"><img src="../../../static/images/logo.png" alt=""></p>
           <p class="info">
-                <span>源升建材配送，家装、工装</span>
-                <span>配送范围：渝北、江北、蔡家</span>
-                <span>配送电话：023-67833317 13368179775 13594077077</span>
+                <span>简介：销售、批发。五金类、工具类、灯具类、劳保类、消防类、日杂类、化工类、水暖类、电器类、电子类、办公类、开关类、锁具类、焊材类、元丝、圆钉、扎丝类</span>
           </p>
       </div>
       <div class="shop-box">
-          <div class="left">
-            <van-sidebar @change="ChangeType">
-                <van-sidebar-item :title="item" v-for="(item,index) in Dic"  :key="index"/>
-            </van-sidebar>
-          </div>
-          <div class="right">
-                <scroll-view @scrolltolower="scrollBottom" scroll-y="true">
-                    <van-card
-                        :num="item.stock?item.stock:''"
-                        :desc="item.summary"
-                        :title="item.title"
-                        :thumb="imgBaseUrl+item.imgUrl"
-                        v-for="(item,index) in GoodsArr"
-                        :key="index"
-                        @click="ShowBigImg(item)"
-                    >
-                    </van-card>
-                </scroll-view>
-          </div>
+            <div class="left">
+                <van-sidebar @change="ChangeType">
+                    <van-sidebar-item :title="item" v-for="(item,index) in Dic"  :key="index"/>
+                </van-sidebar>
+            </div>
+            <div class="right" v-if="GoodsArr">
+                    <scroll-view @scrolltolower="scrollBottom" scroll-y="true">
+                        <van-card
+                            :num="item.stock?item.stock:''"
+                            :desc="item.summary"
+                            :title="item.title"
+                            :thumb="imgBaseUrl+item.imgUrl"
+                            v-for="(item,index) in GoodsArr"
+                            :key="index"
+                            @click="ShowBigImg(item)"
+                        >
+                        </van-card>
+                    </scroll-view>
+            </div>
       </div>
       <div class="img-show" v-if="boolBimImg" @click="CloseShater">
           <img :src="bigImgUrl" alt="">
       </div>
+      <van-toast id="van-toast" />
   </div>
 </template>
 
@@ -39,6 +38,7 @@
 import axios from '../../utils/request.js'
 import {imgBaseUrl} from '../../utils/common.js'
 import { resolve } from 'url';
+import Toast from '../../../static/vant/toast/toast';
 export default {
     data () {
         return {
@@ -52,7 +52,8 @@ export default {
             },
             total:null,
             bigImgUrl:null,
-            boolBimImg:false
+            boolBimImg:false,
+            timer1:null,
         }
     },
 
@@ -78,6 +79,12 @@ export default {
             } )
         },
         GetGoods(){
+            Toast.loading({
+                mask: false,
+                message: '加载中...',
+                duration:0,
+                forbidClick:true
+            });
             axios({
                 url: 'goods/findGoods',
                 method: 'post',
@@ -87,7 +94,11 @@ export default {
                     typeOne: this.typeOne
                 }
             }).then( data => {
-                this.GoodsArr = this.GoodsArr.concat(data.data.data.data);
+                this.timer1 = setTimeout(()=>{
+                    Toast.clear();
+                    this.GoodsArr = this.GoodsArr.concat(data.data.data.data);
+                    clearTimeout(this.timer1);
+                },500)
                 this.total = data.data.data.total;
             } )
         },
@@ -110,11 +121,20 @@ export default {
             this.boolBimImg = false;
         }
     },
-
+    mounted(){
+        wx.showShareMenu({
+            withShareTicket: true
+        })  
+    },
     async onShow(){
         await this.GetDic();
+        this.GoodsArr = [];
+        this.page.size = 1;
         this.GetGoods();
     },
+    onTabItemTap(){
+        this.GoodsArr = [];
+    }
 }
 </script>
 
@@ -132,13 +152,19 @@ export default {
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     margin: 10px auto;
     .name{
-        float: left;
-        font-size: 16px;
-        margin-bottom: 5px;
+            width: 100px;
+            height: 100px;
+            float: left;
+       img{
+            width: 100px;
+            height: 100px;
+       }
     } 
     .info{
+        font-size: 14px;
         float: left;
-        font-size: 12px;
+        width: calc(100% - 120px);
+        margin-left: 10px;
         span{
             display: block;
         }
@@ -148,6 +174,7 @@ export default {
     background-color: #fff;
     overflow: hidden;
     height: calc(100% - 150px);
+    position: relative;
     .left{
         width: 85px;
         float: left;
@@ -169,7 +196,9 @@ export default {
         }
     }
     .right{
-        float: left;
+        // float: left;
+        position: absolute;
+        left: 85px;
         width: calc( 100% - 85px );
         background-color: #fff;
         /deep/ .van-card{

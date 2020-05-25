@@ -1,61 +1,79 @@
 <template>
-  <div>
-      <swiper v-if="imgUrls.length > 0" indidator-dots="imgUrls.length > 1" >
-      <block v-for="(item, index) in imgUrls" :key="index" >
-        <swiper-item>
-          <image :src="item" mode="scaleToFill"></image>
-        </swiper-item>
-      </block>
-    </swiper>
-
-    <ul class="container log-list">
-      <li v-for="(log, index) in logs" :class="{ red: aa }" :key="index" class="log-item">
-        <card :text="(index + 1) + ' . ' + log"></card>
-      </li>
-    </ul>
-  </div>
+  	<div class="people-box">
+		<h1>重庆源优居建材配送欢迎您</h1>
+		<h2>源优居分店一：源升建材配送</h2>
+		<h3>配送范围：<span>渝北、江北、蔡家</span></h3>
+		<h3 class="tel"><i>配送电话：</i><div><span @click="Tel('023-67833317')">023-67833317（点击直接拨打）</span><span @click="Tel('13368179775')">13368179775（点击直接拨打）</span><span @click="Tel('13594077077')">13594077077（点击直接拨打）</span></div></h3>
+		<h2>源优居分店二：优优建材配送</h2>
+		<h3>配送范围：<span>大学城、璧山、沙坪坝、江津</span></h3>
+		<h3 class="tel"><i>配送电话：</i><div><span @click="Tel('023-65234902')">023-65234902（点击直接拨打）</span><span @click="Tel('1522326685')">1522326685（点击直接拨打）</span><span @click="Tel('15178719018')">15178719018（点击直接拨打）</span></div></h3>
+		<h2>源优居分店三：鸿远居建材配送</h2>
+		<h3>配送范围：<span>巴南、九龙坡、南岸</span></h3>
+		<h3 class="tel"><i>配送电话：</i><div><span @click="Tel('023-66456144')">023-66456144（点击直接拨打）</span><span @click="Tel('15178824452')">15178824452（点击直接拨打）</span><span @click="Tel('17338677448')">17338677448（点击直接拨打）</span></div></h3>
+	</div>
 </template>
 
 <script>
-import { formatTime } from '@/utils/index'
-import card from '@/components/card'
 
 export default {
-  components: {
-    card
-  },
-
-  data () {
-    return {
-      logs: [],
-      imgUrls: [
-        'http://mss.sankuai.com/v1/mss_51a7233366a4427fa6132a6ce72dbe54/newsPicture/05558951-de60-49fb-b674-dd906c8897a6',
-        'http://mss.sankuai.com/v1/mss_51a7233366a4427fa6132a6ce72dbe54/coursePicture/0fbcfdf7-0040-4692-8f84-78bb21f3395d',
-        'http://mss.sankuai.com/v1/mss_51a7233366a4427fa6132a6ce72dbe54/management-school-picture/7683b32e-4e44-4b2f-9c03-c21f34320870'
-      ]
-    }
-  },
-
-  created () {
-    let logs
-    if (mpvuePlatform === 'my') {
-      logs = mpvue.getStorageSync({key: 'logs'}).data || []
-    } else {
-      logs = mpvue.getStorageSync('logs') || []
-    }
-    this.logs = logs.map(log => formatTime(new Date(log)))
-  }
+	methods:{
+		Tel(value){
+			wx.makePhoneCall({
+				phoneNumber: value, //呼叫号码
+			})
+		}
+	},
+    mounted(){
+        wx.showShareMenu({
+            withShareTicket: true
+        })  
+    },
+ 
 }
 </script>
 
-<style>
-.log-list {
-  display: flex;
-  flex-direction: column;
-  padding: 40rpx;
-}
+<style lang="less">
+.people-box{
+	padding: 10px;
+	h1 {
+		font-size: 28px;
+		color: red;
+		text-align: center;
+		padding: 10px 0;
+		font-weight: bold;
+	}
+	h2{
+		font-size: 20px;
+		color: red;
+		font-weight: bold;
+		padding-left: 10px;
+		margin: 10px 0 5px 0;
+	}
+	h3{
+		font-size: 18px;
+		padding-left: 10px;
+		margin: 5px 0;
+	}
+	.tel{
+		overflow: hidden;
+		span{
+			white-space: nowrap;
+			margin-right: 10px;
+			font-size: 16px;
+			font-weight: bold;
+			display: block;
 
-.log-item {
-  margin: 10rpx;
+		}
+		div{
+			float: left;
+			width: calc(100% - 95px);
+		}
+		i{
+			float: left;
+			font-style: normal;
+			display: block;
+			width: 95px;
+		}
+	}
 }
 </style>

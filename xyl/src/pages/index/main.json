@@ -6,7 +6,10 @@
         "van-sidebar-item": "/static/vant/sidebar-item/index",
         "van-card": "/static/vant/card/index",
         "van-dropdown-menu": "/static/vant/dropdown-menu/index",
-        "van-dropdown-item": "/static/vant/dropdown-item/index"
+        "van-dropdown-item": "/static/vant/dropdown-item/index",
+        "van-row": "/static/vant/row/index",
+        "van-toast": "/static/vant/toast/index",
+        "van-col": "/static/vant/col/index"
     },
     "navigationBarTitleText": "源升建材"
 }
