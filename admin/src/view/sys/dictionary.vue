@@ -17,11 +17,13 @@
             </div>
             <Table border v-if="typeName == 'type_one'"  :columns="tableOneColumn" :data="tableData"></Table>
             <Table border v-else-if="typeName == 'type_two'"  :columns="tableTwoColumn" :data="tableTwoData"></Table>
+            <Table border v-else-if="typeName == 'type_three'"  :columns="tableThreeColumn" :data="tableThreeData"></Table>
             <Modal
                 v-model="visiable"
                 :title="titleType"
                 :loading="loading"
                 @on-ok="showModel('formValidate')"
+                :mask-closable="false"
                 @on-cancel="cancelModel">
                     <Form ref="formValidate" :model="formValidate" :rules="ruleValidate" :label-width="80">
                         <FormItem label="一类目录" prop="typeOne" v-if="typeName == 'type_one'">
@@ -41,11 +43,11 @@
                             </Select>
                         </FormItem>
                         <FormItem label="二类目录" prop="typeTwo" v-if="typeName == 'type_three'">
-                             <Select v-model="newTypeOne" @on-change="ChangeTypeOne" :label-in-value="true" >
-                                <Option v-for="(item,index) in typeTwoArr" :value="item._id" :key="index">{{ item.typeOne }}</Option>
+                             <Select v-model="newTypeTwo" @on-change="ChangeTypeTwo" :label-in-value="true" >
+                                <Option v-for="(item,index) in typeTwoArr" :value="item._id" :key="index">{{ item.typeTwo }}</Option>
                             </Select>
                         </FormItem>
-                        <FormItem label="三类目录" prop="content" v-if="typeName == 'type_three'">
+                        <FormItem label="三类目录" prop="typeThree" v-if="typeName == 'type_three'">
                             <Input v-model="formValidate.typeThree" ></Input>
                         </FormItem>
                     </Form>
@@ -54,7 +56,7 @@
     </div>
 </template>
 <script>
-import { upsertTypeOne, getTypeOne, upsertTypeTwo, delTypeOne, delTypeTwo, getTypeTwo } from '@/api/dictionary'
+import { upsertTypeOne, getTypeOne, upsertTypeTwo, delTypeOne, delTypeTwo, getTypeTwo, upsertTypeThree, getTypeThree, delTypeThree } from '@/api/dictionary'
 // import { constants, truncate } from 'fs'
 import { formatDateTime } from '@/global/global'
 // import { fail } from 'assert'
@@ -73,10 +75,10 @@ export default {
                 ],
                 typeTwo: [
                     { required: true, message: '二级类别必填！', trigger: 'blur' }
+                ],
+                typeThree: [
+                    { required: true, message: '三级类别必填！', trigger: 'blur' }
                 ]
-                // content: [
-                //     { required: true, message: '内容必填！', trigger: 'blur' }
-                // ]
             },
             visiable: false,
             loading: true,
@@ -230,10 +232,104 @@ export default {
                     }
                 }
             ],
+            tableThreeColumn: [
+                {
+                    title: '序号',
+                    width: 100,
+                    render: (h, params) => {
+                        return h('div', params.index + 1)
+                    }
+                },
+                {
+                    title: '一类目录',
+                    key: 'typeOne'
+                },
+                {
+                    title: '二类目录',
+                    key: 'typeTwo'
+                },
+                {
+                    title: '三类目录',
+                    key: 'typeThree'
+                },
+                {
+                    title: '创建时间',
+                    key: 'created',
+                    render: (h, params) => {
+                        return h('div', params.row.created ? formatDateTime(params.row.created) : '')
+                    }
+                },
+                {
+                    title: '操作',
+                    key: 'action',
+                    width: 150,
+                    align: 'center',
+                    render: (h, params) => {
+                        return h('div', [
+                            h('Button', {
+                                props: {
+                                    type: 'primary',
+                                    size: 'small'
+                                },
+                                style: {
+                                    marginRight: '5px'
+                                },
+                                on: {
+                                    click: () => {
+                                        this.visiable = true
+                                        this.titleType = '编辑'
+                                        this.formValidate = Object.assign({}, params.row)
+                                        this.newTypeOne = params.row.typeOneId
+                                        getTypeTwo({typeOneId: params.row.typeOneId}).then(res => {
+                                            this.typeTwoArr = []
+                                            if (this.typeName === 'type_three') {
+                                                res.data.data.forEach(item => {
+                                                    this.typeTwoArr.push({
+                                                        _id: item._id,
+                                                        typeTwo: item.typeTwo
+                                                    })
+                                                })
+                                                this.newTypeTwo = params.row.typeTwoId
+                                            }
+                                        })
+                                        console.log(params)
+                                    }
+                                }
+                            }, '修改'),
+                            h('Button', {
+                                props: {
+                                    type: 'error',
+                                    size: 'small'
+                                },
+                                on: {
+                                    click: () => {
+                                        this.$Modal.confirm({
+                                            title: '提示11',
+                                            content: '<p>是否删除该条数据？删除后不可恢复！</p>',
+                                            okText: '确定',
+                                            onOk: () => {
+                                                delTypeThree(params.row._id).then(res => {
+                                                    if (!res.data.code) {
+                                                        this.$Message.success('删除成功!')
+                                                        this.GetTypeThree()
+                                                    }
+                                                })
+                                            },
+                                            cancelText: '取消'
+                                        })
+                                    }
+                                }
+                            }, '删除')
+                        ])
+                    }
+                }
+            ],
             typeName: 'type_one',
             typeOneArr: [],
             newTypeOne: '',
-            typeTwoArr: []
+            typeTwoArr: [],
+            newTypeTwo: '',
+            tableThreeData: []
         }
     },
     methods: {
@@ -242,13 +338,35 @@ export default {
             this.getTypeOneData()
             if (value === 'type_two') {
                 this.GetTypeTwo()
+            } else if (value === 'type_three') {
+                this.GetTypeThree()
             }
             this.newTypeOne = ''
         },
         ChangeTypeOne (value) {
             if (!value) return
-            this.formValidate._id = value.value
+            this.formValidate.typeOneId = value.value
             this.formValidate.typeOne = value.label
+            // 调用二级类目
+            if (this.typeName === 'type_three') {
+                this.newTypeTwo = ''
+                getTypeTwo({typeOneId: value.value}).then(res => {
+                    this.typeTwoArr = []
+                    if (this.typeName === 'type_three') {
+                        res.data.data.forEach(item => {
+                            this.typeTwoArr.push({
+                                _id: item._id,
+                                typeTwo: item.typeTwo
+                            })
+                        })
+                    }
+                })
+            }
+        },
+        ChangeTypeTwo (value) {
+            if (!value) return
+            this.formValidate.typeTwoId = value.value
+            this.formValidate.typeTwo = value.label
         },
         gotoAdd () {
             this.visiable = true
@@ -277,14 +395,16 @@ export default {
                             this.visiable = false
                         })
                     } else if (this.typeName === 'type_two') {
-                        console.log(this.formValidate)
                         formData = {
                             typeOne: this.formValidate.typeOne,
                             typeOneId: this.formValidate.typeOneId,
-                            typeTwo: this.formValidate.typeTwo,
-                            _id: this.formValidate._id ? this.formValidate._id : null
+                            typeTwo: this.formValidate.typeTwo
                         }
-                        console.log(formData)
+                        if (this.formValidate._id) {
+                            formData._id = this.formValidate._id
+                        }
+                        // console.log(formData)
+                        // return
                         // 新增修改二类目录
                         upsertTypeTwo(formData).then(res => {
                             if (!res.data.code) {
@@ -297,6 +417,31 @@ export default {
                             this.newTypeOne = ''
                             this.GetTypeTwo()
                             this.visiable = false
+                        })
+                    } else if (this.typeName === 'type_three') {
+                        formData = {
+                            typeTwo: this.formValidate.typeTwo,
+                            typeTwoId: this.formValidate.typeTwoId,
+                            typeThree: this.formValidate.typeThree,
+                            typeOne: this.formValidate.typeOne,
+                            typeOneId: this.formValidate.typeOneId
+                        }
+                        if (this.formValidate._id) {
+                            formData._id = this.formValidate._id
+                        }
+                        upsertTypeThree(formData).then(res => {
+                            if (!res.data.code) {
+                                if (formData._id) {
+                                    this.$Message.success('修改成功！')
+                                } else {
+                                    this.$Message.success('新增成功！')
+                                }
+                            }
+                            this.newTypeOne = ''
+                            this.newTypeTwo = ''
+                            this.GetTypeThree()
+                            this.visiable = false
+                            this.typeTwoArr = []
                         })
                     }
                 } else {
@@ -331,8 +476,13 @@ export default {
         GetTypeTwo () {
             this.tableTwoData = []
             getTypeTwo().then(res => {
-                console.log(res)
                 this.tableTwoData = res.data.data ? res.data.data : []
+            })
+        },
+        GetTypeThree () {
+            this.tableThreeData = []
+            getTypeThree().then(res => {
+                this.tableThreeData = res.data.data ? res.data.data : []
             })
         }
     },

@@ -49,7 +49,6 @@ exports.findGoods = async (ctx, next) => {
     let options = {};
     let page = param.page || 0;
     let num = param.num || 10;
-    console.log(param,conditions,fields,options,page,num,'77887878')
     const result = await operate.find(conditions,fields,options,page,num);
     const total = await operate.count(conditions);
     if(result) {

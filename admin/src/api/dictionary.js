@@ -37,16 +37,40 @@ export const upsertTypeTwo = (data) => {
 export const getTypeTwo = (data) => {
     return axios.request({
         url: '/dic/getTypeTwo',
-        params: {
-            data
-        },
-        method: 'get'
+        data,
+        method: 'post'
     })
 }
 // 删除二类目录
 export const delTypeTwo = (id) => {
     return axios.request({
         url: '/dic/delTypeTwo',
+        params: {
+            id
+        },
+        method: 'get'
+    })
+}
+// 新增三类目录
+export const upsertTypeThree = (data) => {
+    return axios.request({
+        url: '/dic/upsertTypeThree',
+        data,
+        method: 'post'
+    })
+}
+// 获取三类目录
+export const getTypeThree = (data) => {
+    return axios.request({
+        url: '/dic/getTypeThree',
+        data,
+        method: 'post'
+    })
+}
+// 删除三类目录
+export const delTypeThree = (id) => {
+    return axios.request({
+        url: '/dic/delTypeThree',
         params: {
             id
         },

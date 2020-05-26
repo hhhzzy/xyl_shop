@@ -6,13 +6,18 @@
                     <Input v-model="formData.title" placeholder="请输入标题"></Input>
                 </FormItem>
                 <FormItem label="一类目录：" prop="typeOne">
-                    <Select v-model="formData.typeOne" placeholder="请选择一类目录" @on-change="ChangeTypeOne">
-                        <Option v-for="(item,index) in typeOne" :value="item" :key="index">{{ item }}</Option>
+                    <Select v-model="formData.typeOneId" placeholder="请选择一类目录" label-in-value  @on-change="ChangeTypeOne">
+                        <Option v-for="(item,index) in typeOne" :value="item._id" :key="index">{{ item.typeOne }}</Option>
                     </Select>
                 </FormItem>
                 <FormItem label="二类目录：">
-                    <Select v-model="formData.typeTwo" placeholder="请选择二类目录">
-                        <Option v-for="(item,index) in typeTwo" :value="item" :key="index">{{ item }}</Option>
+                    <Select v-model="formData.typeTwoId" placeholder="请选择二类目录" label-in-value @on-change="ChangeTypeTwo">
+                        <Option v-for="(item,index) in typeTwo" :value="item._id" :key="index">{{ item.typeTwo }}</Option>
+                    </Select>
+                </FormItem>
+                <FormItem label="三类目录：">
+                    <Select v-model="formData.typeThree" placeholder="请选择三类目录">
+                        <Option v-for="(item,index) in typeThree" :value="item._id" label-in-value :key="index">{{ item.typeThree }}</Option>
                     </Select>
                 </FormItem>
                 <FormItem label="商品简介：" prop="summary">
@@ -41,11 +46,11 @@
                 <FormItem label="库存：">
                     <Input v-model="formData.stock" placeholder="请输入库存"></Input>
                 </FormItem>
+                <FormItem label="价格：">
+                    <Input v-model="formData.price" placeholder="请输入价格"></Input>
+                </FormItem>
                 <!-- <FormItem label="排序：">
                     <Input v-model="formData.sortIndex" placeholder="请输入排序号"></Input>
-                </FormItem> -->
-                <!-- <FormItem label="内容：">
-                    <markdown-editor v-model="formData.content"/>
                 </FormItem> -->
                 <FormItem>
                     <Button type="primary" @click="handleSubmit('formData')">提交</Button>
@@ -56,7 +61,7 @@
     </div>
 </template>
 <script>
-import { getDictionary } from '@/api/dictionary'
+import { getTypeOne, getTypeTwo, getTypeThree } from '@/api/dictionary'
 import { upsertGoods, findOne } from '@/api/goods'
 import MarkdownEditor from '_c/markdown'
 import configInfo from '@/config/index.js'
@@ -85,7 +90,8 @@ export default {
             typeOne: [],
             typeTwo: [],
             baseUrl: '',
-            defaultImg: []
+            defaultImg: [],
+            typeThree: []
         }
     },
     methods: {
@@ -137,28 +143,51 @@ export default {
         },
         // 获取一类目录
         GetTypeOne () {
-            getDictionary().then(res => {
+            getTypeOne().then(res => {
                 this.typeOne = []
-                this.typeTwo = []
                 if (res.data.data) {
                     res.data.data.forEach(item => {
-                        this.typeOne.push(item.typeOne)
-                        if (item.typeOne === this.formData.typeOne) {
-                            this.typeTwo = item.typeTwo
-                        }
+                        this.typeOne.push({
+                            _id: item._id,
+                            typeOne: item.typeOne
+                        })
                     })
                 }
             })
         },
         // 一类目录变化
         ChangeTypeOne (value) {
-            getDictionary().then(res => {
+            console.log(value)
+            this.formData.typeTwo = ''
+            this.formData.typeOne = value.label
+            this.formData.typeOneId = value.value
+            getTypeTwo({typeOneId: value.value}).then(res => {
                 this.typeTwo = []
                 if (res.data.data) {
                     res.data.data.forEach(item => {
-                        if (item.typeOne === value) {
-                            this.typeTwo = item.typeTwo
-                        }
+                        this.typeTwo.push({
+                            _id: item._id,
+                            typeTwo: item.typeTwo
+                        })
+                    })
+                }
+            })
+        },
+        // 二类目录变化
+        ChangeTypeTwo (value) {
+            console.log(value)
+            this.formData.typeThree = ''
+            this.formData.typeTwo = value.label
+            this.formData.typeTwoId = value.value
+            getTypeThree({typeTwoId: value.value}).then(res => {
+                console.log(res)
+                this.typeThree = []
+                if (res.data.data) {
+                    res.data.data.forEach(item => {
+                        this.typeThree.push({
+                            _id: item._id,
+                            typeThree: item.typeThree
+                        })
                     })
                 }
             })
@@ -167,11 +196,41 @@ export default {
     created () {
         if (this.$route.query.id) {
             this.id = this.$route.query.id
-            findOne({id: this.id}).then(res => {
+            findOne({id: this.id}).then(async res => {
                 this.formData = res.data.data || {}
                 this.defaultImg.push({
                     name: res.data.data.imgUrl,
                     url: this.baseUrl + res.data.data.imgUrl
+                })
+                console.log(this.formData)
+                // 通过一级目录查询二级目录
+                await new Promise((resolve, reject) => {
+                    getTypeTwo({typeOneId: this.formData.typeOne}).then(res => {
+                        this.typeTwo = []
+                        if (res.data.data) {
+                            res.data.data.forEach(item => {
+                                this.typeTwo.push({
+                                    _id: item._id,
+                                    typeTwo: item.typeTwo
+                                })
+                            })
+                        }
+                        resolve()
+                    })
+                })
+                await new Promise((resolve, reject) => {
+                    getTypeThree({typeTwoId: this.formData.typeTwo}).then(res => {
+                        console.log(res)
+                        this.typeThree = []
+                        if (res.data.data) {
+                            res.data.data.forEach(item => {
+                                this.typeThree.push({
+                                    _id: item._id,
+                                    typeThree: item.typeThree
+                                })
+                            })
+                        }
+                    })
                 })
             })
         }

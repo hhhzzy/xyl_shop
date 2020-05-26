@@ -1,4 +1,4 @@
-let typeTwoModel = require('./typeTwo.js');
+let typeThreeModel = require('./typeThree.js');
 module.exports = {
     /**
      * 
@@ -9,7 +9,7 @@ module.exports = {
     find(conditions = {}, fields = null, options = {}) {
         return new Promise((resolve, reject) => {
             //model.find(需要查找的对象(如果为空，则查找到所有数据), 属性过滤对象[可选参数], options[可选参数], callback)
-            typeTwoModel.find(conditions, fields, options, (error, doc) => {
+            typeThreeModel.find(conditions, fields, options, (error, doc) => {
                 if (error) {
                     reject(error)
                 } else {
@@ -21,7 +21,7 @@ module.exports = {
     findOne(data) {
         return new Promise((resolve, reject) => {
             //model.findOne(需要查找的对象,callback)
-            typeTwoModel.findOne(data, (error, doc) => {
+            typeThreeModel.findOne(data, (error, doc) => {
                 if (error) {
                     reject(error)
                 } else {
@@ -39,7 +39,7 @@ module.exports = {
     upsert(conditions, update, type) {
         return new Promise((resolve, reject) => {
             //model.update(查询条件,更新对象,callback)
-            typeTwoModel.update(conditions, update,{"upsert":'true',new:'true'}, (error, doc) => {
+            typeThreeModel.update(conditions, update,{"upsert":'true',new:'true'}, (error, doc) => {
                 if (error) {
                     reject(error)
                 } else {
@@ -54,7 +54,7 @@ module.exports = {
      */
     remove(conditions) {
         return new Promise((resolve, reject) => {
-            typeTwoModel.remove(conditions, (error, doc) => {
+            typeThreeModel.remove(conditions, (error, doc) => {
                 if (error) {
                     reject(error)
                 } else {

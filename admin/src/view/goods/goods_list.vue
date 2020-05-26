@@ -28,7 +28,7 @@
     </div>
 </template>
 <script>
-import { getDictionary } from '@/api/dictionary'
+import { getTypeOne } from '@/api/dictionary'
 import { findGoods, delGoods } from '@/api/goods'
 import { formatDateTime } from '@/global/global'
 import configInfo from '@/config/index.js'
@@ -169,7 +169,7 @@ export default {
             })
         }, // 获取一类目录
         GetTypeOne () {
-            getDictionary().then(res => {
+            getTypeOne().then(res => {
                 this.typeOne = []
                 if (res.data.data) {
                     res.data.data.forEach(item => {
