@@ -5,19 +5,19 @@
                 <FormItem label="商品名称：" prop="title">
                     <Input v-model="formData.title" placeholder="请输入标题"></Input>
                 </FormItem>
-                <FormItem label="一类目录：" prop="typeOne">
+                <FormItem label="一类目录：" prop="typeOneId">
                     <Select v-model="formData.typeOneId" placeholder="请选择一类目录" label-in-value  @on-change="ChangeTypeOne">
                         <Option v-for="(item,index) in typeOne" :value="item._id" :key="index">{{ item.typeOne }}</Option>
                     </Select>
                 </FormItem>
-                <FormItem label="二类目录：">
+                <FormItem label="二类目录：" prop="typeTwoId">
                     <Select v-model="formData.typeTwoId" placeholder="请选择二类目录" label-in-value @on-change="ChangeTypeTwo">
                         <Option v-for="(item,index) in typeTwo" :value="item._id" :key="index">{{ item.typeTwo }}</Option>
                     </Select>
                 </FormItem>
-                <FormItem label="三类目录：">
-                    <Select v-model="formData.typeThree" placeholder="请选择三类目录">
-                        <Option v-for="(item,index) in typeThree" :value="item._id" label-in-value :key="index">{{ item.typeThree }}</Option>
+                <FormItem label="三类目录：" prop="typeThreeId">
+                    <Select v-model="formData.typeThreeId" placeholder="请选择三类目录" label-in-value @on-change="ChangeTypeThree">
+                        <Option v-for="(item,index) in typeThree" :value="item._id" :key="index">{{ item.typeThree }}</Option>
                     </Select>
                 </FormItem>
                 <FormItem label="商品简介：" prop="summary">
@@ -27,6 +27,10 @@
                     <div class="demo-upload-list" v-for="(item,index) in defaultImg" :key="index">
                         <template>
                             <img :src="item.url">
+                            <div class="demo-upload-list-cover">
+                                <!-- <Icon type="ios-eye-outline" @click.native="handleView(item.name)"></Icon> -->
+                                <Icon type="ios-trash-outline" @click.native="removeImg(item)"></Icon>
+                            </div>
                         </template>
                     </div>
                     <Upload :action="baseUrl+'api/files/upload'"
@@ -62,7 +66,7 @@
 </template>
 <script>
 import { getTypeOne, getTypeTwo, getTypeThree } from '@/api/dictionary'
-import { upsertGoods, findOne } from '@/api/goods'
+import { upsertGoods, findOne, deleteImg } from '@/api/goods'
 import MarkdownEditor from '_c/markdown'
 import configInfo from '@/config/index.js'
 // import { constants } from 'fs'
@@ -80,7 +84,13 @@ export default {
                 title: [
                     { required: true, message: '请输入标题', trigger: 'blur' }
                 ],
-                typeOne: [
+                typeOneId: [
+                    { required: true, message: '请选择一类目录', trigger: 'change' }
+                ],
+                typeTwoId: [
+                    { required: true, message: '请选择一类目录', trigger: 'change' }
+                ],
+                typeThreeId: [
                     { required: true, message: '请选择一类目录', trigger: 'change' }
                 ],
                 summary: [
@@ -129,12 +139,12 @@ export default {
         },
         // 上传图片
         uploadSuccess (res, file) {
-            this.defaultImg = []
+            console.log(res)
             if (res.data) {
                 this.formData.imgUrl = res.data
                 this.defaultImg.push({
-                    name: res.data.data,
-                    url: this.baseUrl + res.data
+                    name: res.data.name,
+                    url: this.baseUrl + res.data.path
                 })
             }
         },
@@ -158,7 +168,8 @@ export default {
         // 一类目录变化
         ChangeTypeOne (value) {
             console.log(value)
-            this.formData.typeTwo = ''
+            this.formData.typeTwoId = ''
+            if (!value) return
             this.formData.typeOne = value.label
             this.formData.typeOneId = value.value
             getTypeTwo({typeOneId: value.value}).then(res => {
@@ -176,7 +187,8 @@ export default {
         // 二类目录变化
         ChangeTypeTwo (value) {
             console.log(value)
-            this.formData.typeThree = ''
+            this.formData.typeThreeId = ''
+            if (!value) return
             this.formData.typeTwo = value.label
             this.formData.typeTwoId = value.value
             getTypeThree({typeTwoId: value.value}).then(res => {
@@ -190,6 +202,20 @@ export default {
                         })
                     })
                 }
+            })
+        },
+        // 三类目录变化
+        ChangeTypeThree (value) {
+            console.log(this.formData)
+            if (!value) return
+            this.formData.typeThree = value.label
+            this.formData.typeThreeId = value.value
+        },
+        // 删除图片
+        removeImg (data) {
+            console.log(data.name)
+            deleteImg(data.name).then(res => {
+                console.log(res)
             })
         }
     },
@@ -205,7 +231,7 @@ export default {
                 console.log(this.formData)
                 // 通过一级目录查询二级目录
                 await new Promise((resolve, reject) => {
-                    getTypeTwo({typeOneId: this.formData.typeOne}).then(res => {
+                    getTypeTwo({typeOneId: this.formData.typeOneId}).then(res => {
                         this.typeTwo = []
                         if (res.data.data) {
                             res.data.data.forEach(item => {
@@ -218,8 +244,9 @@ export default {
                         resolve()
                     })
                 })
+                console.log(this.typeTwo)
                 await new Promise((resolve, reject) => {
-                    getTypeThree({typeTwoId: this.formData.typeTwo}).then(res => {
+                    getTypeThree({typeTwoId: this.formData.typeTwoId}).then(res => {
                         console.log(res)
                         this.typeThree = []
                         if (res.data.data) {

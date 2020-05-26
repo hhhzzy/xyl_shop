@@ -28,7 +28,16 @@ export const delGoods = (id) => {
         method: 'get'
     })
 }
-
+// 删除图片
+export const deleteImg = (name) => {
+    return axios.request({
+        url: '/files/deleteImg',
+        params: {
+            name
+        },
+        method: 'get'
+    })
+}
 // 查找单个
 export const findOne = (data) => {
     return axios.request({
