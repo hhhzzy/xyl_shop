@@ -26,7 +26,7 @@
                 <FormItem label="图片：">
                     <div class="demo-upload-list" v-for="(item,index) in defaultImg" :key="index">
                         <template>
-                            <img :src="item.url">
+                            <img :src="item.path">
                             <div class="demo-upload-list-cover">
                                 <!-- <Icon type="ios-eye-outline" @click.native="handleView(item.name)"></Icon> -->
                                 <Icon type="ios-trash-outline" @click.native="removeImg(item)"></Icon>
@@ -78,6 +78,7 @@ export default {
     data () {
         return {
             formData: {
+                imgUrl: []
             },
             id: '', // 文章详情id
             ruleValidate: {
@@ -139,14 +140,49 @@ export default {
         },
         // 上传图片
         uploadSuccess (res, file) {
-            console.log(res)
             if (res.data) {
-                this.formData.imgUrl = res.data
+                this.formData.imgUrl.push(res.data)
                 this.defaultImg.push({
                     name: res.data.name,
-                    url: this.baseUrl + res.data.path
+                    path: this.baseUrl + res.data.path
                 })
             }
+        },
+        // 删除图片
+        async removeImg (data) {
+            this.$Modal.confirm({
+                title: '提示',
+                content: '是否删除该照片，删除后不可恢复！',
+                onOk: async () => {
+                    // 删除图片
+                    await new Promise((resolve, reject) => {
+                        deleteImg(data.name).then(res => {
+                            if (res) {
+                                // this.defaultImg = this.defaultImg.filter((item, index) => {
+                                //     return item.name !== data.name
+                                // })
+                                resolve()
+                            }
+                        })
+                    })
+                    let boolSub = false
+                    // 更新字段  判断图片是否已经写入数据库
+                    this.formData.imgUrl.forEach((item, index) => {
+                        if (item.name === data.name) {
+                            this.formData.imgUrl.splice(index, 1)
+                            boolSub = true
+                        }
+                    })
+                    if (!boolSub) return
+                    upsertGoods(this.formData)
+                        .then((res) => {
+                            if (!res.data.code) {
+                                this.$Message.success('删除成功！')
+                                this.GetInfo()
+                            }
+                        })
+                }
+            })
         },
         handleReset (name) {
             this.$refs[name].resetFields()
@@ -211,24 +247,23 @@ export default {
             this.formData.typeThree = value.label
             this.formData.typeThreeId = value.value
         },
-        // 删除图片
-        removeImg (data) {
-            console.log(data.name)
-            deleteImg(data.name).then(res => {
-                console.log(res)
-            })
-        }
-    },
-    created () {
-        if (this.$route.query.id) {
-            this.id = this.$route.query.id
+        // 查询详情
+        GetInfo () {
             findOne({id: this.id}).then(async res => {
-                this.formData = res.data.data || {}
-                this.defaultImg.push({
-                    name: res.data.data.imgUrl,
-                    url: this.baseUrl + res.data.data.imgUrl
-                })
+                this.formData = res.data.data || {
+                    imgUrl: []
+                }
+                this.defaultImg = []
                 console.log(this.formData)
+                if (this.formData.imgUrl) {
+                    this.formData.imgUrl.forEach(item => {
+                        this.defaultImg.push({
+                            path: this.baseUrl + item.path,
+                            name: item.name
+                        })
+                    })
+                }
+                console.log(this.defaultImg)
                 // 通过一级目录查询二级目录
                 await new Promise((resolve, reject) => {
                     getTypeTwo({typeOneId: this.formData.typeOneId}).then(res => {
@@ -244,10 +279,8 @@ export default {
                         resolve()
                     })
                 })
-                console.log(this.typeTwo)
                 await new Promise((resolve, reject) => {
                     getTypeThree({typeTwoId: this.formData.typeTwoId}).then(res => {
-                        console.log(res)
                         this.typeThree = []
                         if (res.data.data) {
                             res.data.data.forEach(item => {
@@ -260,6 +293,12 @@ export default {
                     })
                 })
             })
+        }
+    },
+    created () {
+        if (this.$route.query.id) {
+            this.id = this.$route.query.id
+            this.GetInfo()
         }
         this.baseUrl = process.env.NODE_ENV === 'development' ? configInfo.baseUrl.imgDev : configInfo.baseUrl.imgPro
         // 获取一类目录

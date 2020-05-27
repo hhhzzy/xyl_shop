@@ -68,20 +68,24 @@ export default {
                     title: '图片',
                     key: 'imgUrl',
                     render: (h, params) => {
-                        return h('img', {
-                            attrs: {
-                                src: this.baseUrl + params.row.imgUrl
-                            },
-                            style: {
-                                width: '50px',
-                                hegith: '50px'
-                            },
-                            on: {
-                                click: () => {
+                        console.log(params)
+                        var imgArr = params.row.imgUrl
+                        return h('span', imgArr.map((item) => {
+                            return h('img', {
+                                attrs: {
+                                    src: this.baseUrl + item.path
+                                },
+                                style: {
+                                    width: '50px',
+                                    hegith: '50px'
+                                },
+                                on: {
+                                    click: () => {
 
+                                    }
                                 }
-                            }
-                        })
+                            })
+                        }))
                     }
                 },
                 {

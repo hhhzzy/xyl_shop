@@ -6,10 +6,15 @@
                 <span>简介：销售、批发。五金类、工具类、灯具类、劳保类、消防类、日杂类、化工类、水暖类、电器类、电子类、办公类、开关类、锁具类、焊材类、元丝、圆钉、扎丝类</span>
           </p>
       </div>
+      <div class="nav-box">
+          <span>全部</span>>
+          <span>水电</span>>
+          <span class="current">水电4</span>
+      </div>
       <div class="shop-box">
             <div class="left">
                 <van-sidebar @change="ChangeType">
-                    <van-sidebar-item :title="item" v-for="(item,index) in Dic"  :key="index"/>
+                    <van-sidebar-item :title="item.typeOne" v-for="(item,index) in Dic"  :key="index"/>
                 </van-sidebar>
             </div>
             <div class="right" v-if="GoodsArr">
@@ -54,6 +59,7 @@ export default {
             bigImgUrl:null,
             boolBimImg:false,
             timer1:null,
+            typeTwoArr:[]
         }
     },
 
@@ -61,19 +67,17 @@ export default {
     },
 
     methods: {
-        GetDic(){
+        GetTypeOne(){
             this.Dic = [];
             return new Promise( (resolve,reject) => {
                 axios({
-                    url: 'dic/getDic',
+                    url: 'dic/getTypeOne',
                     method: 'get'
                 }).then( data => {
                     if(data.data.data){
-                        data.data.data.forEach(item => {
-                            this.Dic.push(item.typeOne);
-                        });
+                        this.Dic = data.data.data
                     }
-                    this.typeOne = this.Dic[0];
+                    this.typeOne = this.Dic[0].typeOne;
                     resolve();
                 } )
             } )
@@ -103,10 +107,27 @@ export default {
             } )
         },
         ChangeType(data){
+            console.log(data)
             this.page.size = 1;
             this.GoodsArr = [];
-            this.typeOne = this.Dic[data.mp.detail];
-            this.GetGoods();
+            let currentObj = this.Dic[data.mp.detail];
+            // this.GetGoods();
+            console.log(currentObj)
+            // 获取二级分类
+            axios({
+                    url: 'dic/getTypeTwo',
+                    data:{
+                        typeOneId:currentObj._id
+                    },
+                    method: 'post'
+                }).then( data => {
+                    console.log(data)
+                    if(data.data.data){
+                        
+                    }
+                    this.typeOne = this.Dic[0];
+                    resolve();
+                } )
         },
         scrollBottom(){
             if(this.total == this.GoodsArr.length) return;
@@ -127,7 +148,7 @@ export default {
         })  
     },
     async onShow(){
-        await this.GetDic();
+        await this.GetTypeOne();
         this.GoodsArr = [];
         this.page.size = 1;
         this.GetGoods();
@@ -148,25 +169,42 @@ export default {
     padding: 10px 10px;
     overflow: hidden;
     width: 340px;
-    height: 110px;
+    height: 80px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     margin: 10px auto;
+    margin-bottom: 0;
     .name{
-            width: 100px;
-            height: 100px;
+            width: 70px;
+            height: 70px;
             float: left;
        img{
-            width: 100px;
-            height: 100px;
+            width: 70px;
+            height: 70px;
        }
     } 
     .info{
         font-size: 14px;
         float: left;
-        width: calc(100% - 120px);
+        width: calc(100% - 80px);
         margin-left: 10px;
+        height: 80px;
+        overflow: hidden;
         span{
             display: block;
+
+        }
+    }
+}
+.nav-box{
+    padding: 10px 10px;
+    font-size: 14px;
+    border-bottom: 1px solid #e5e5e5;
+    span{
+        font-size: 15px;
+        font-weight: 500;
+        color: #3a95de;
+        &.current{
+            font-weight: bold;
         }
     }
 }
@@ -178,6 +216,8 @@ export default {
     .left{
         width: 85px;
         float: left;
+        overflow-y: auto;
+        height: 100%;
         ul{
             overflow-y: scroll;
             height: auto;

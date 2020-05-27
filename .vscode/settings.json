@@ -1,0 +1,6 @@
+{ 
+    "eslint.enable": true, // 是否开启检测
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": true
+    }
+}

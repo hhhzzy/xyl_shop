@@ -17,11 +17,12 @@ exports.upload = async (ctx, next) => {
     
 }
 
-//删除文件
+//删除图片
 exports.deleteImg = async (ctx, next) => {
     let param = ctx.query;
     console.log('uploads/'+param.name,'99999');
-    const file = fs.unlinkSync('public/uploads/'+param.name);	// 获取上传文件
+    const file = fs.unlinkSync('public/uploads/'+param.name);	// 删除照片
+    
     console.log(file,'8888');
     if(file == undefined){
         return ctx.body = {

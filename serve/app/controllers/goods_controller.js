@@ -8,6 +8,7 @@ const mongoose = require('mongoose');
  */
 exports.upsertGoods = async (ctx, next) => {
     let param = ctx.request.body;
+    console.log(param,'8888')
     if(param.title && param.summary){
         if (param._id) {
             await operate.upsert({'_id':param._id},param);

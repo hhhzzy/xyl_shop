@@ -25,18 +25,15 @@ var response_formatter = async (ctx, next) => {
     //         }
     //     }
     // }
+    //如果有返回数据，将返回数据添加到data中
     if (ctx.body) {
-        if(ctx.body.code == 0) {
-            ctx.body = ctx.body
-        } else {
-            ctx.body = {
-                code: 0,
-                message: 'success',
-                data: ctx.body
-            }
+        ctx.body = ctx.body
+    } else {
+        ctx.body = {
+            code: 0,
+            message: 'success'
         }
-        
-    } 
+    }
 }
 var url_filter = function(pattern){
 
@@ -55,7 +52,7 @@ var url_filter = function(pattern){
                 }
             }
             //继续抛，让外层中间件处理日志
-            // throw error;
+            throw error;
         }
         
         //通过正则的url进行格式化处理
