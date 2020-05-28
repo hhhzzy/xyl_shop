@@ -10,13 +10,13 @@
                         <Option v-for="(item,index) in typeOne" :value="item._id" :key="index">{{ item.typeOne }}</Option>
                     </Select>
                 </FormItem>
-                <FormItem label="二类目录：" prop="typeTwoId">
+                <FormItem label="二类目录：" prop="typeTwoId" >
                     <Select v-model="formData.typeTwoId" placeholder="请选择二类目录" label-in-value @on-change="ChangeTypeTwo">
                         <Option v-for="(item,index) in typeTwo" :value="item._id" :key="index">{{ item.typeTwo }}</Option>
                     </Select>
                 </FormItem>
                 <FormItem label="三类目录：" prop="typeThreeId">
-                    <Select v-model="formData.typeThreeId" placeholder="请选择三类目录" label-in-value @on-change="ChangeTypeThree">
+                    <Select v-model="formData.typeThreeId" placeholder="请选择三类目录" label-in-value @on-change="ChangeTypeThree" ref="typeThree">
                         <Option v-for="(item,index) in typeThree" :value="item._id" :key="index">{{ item.typeThree }}</Option>
                     </Select>
                 </FormItem>
@@ -203,13 +203,13 @@ export default {
         },
         // 一类目录变化
         ChangeTypeOne (value) {
-            console.log(value)
-            this.formData.typeTwoId = ''
             if (!value) return
+            this.formData.typeTwoId = ''
             this.formData.typeOne = value.label
             this.formData.typeOneId = value.value
             getTypeTwo({typeOneId: value.value}).then(res => {
                 this.typeTwo = []
+                this.typeThree = []
                 if (res.data.data) {
                     res.data.data.forEach(item => {
                         this.typeTwo.push({
@@ -222,13 +222,12 @@ export default {
         },
         // 二类目录变化
         ChangeTypeTwo (value) {
-            console.log(value)
             this.formData.typeThreeId = ''
+            this.formData.typeThree = ''
             if (!value) return
             this.formData.typeTwo = value.label
             this.formData.typeTwoId = value.value
             getTypeThree({typeTwoId: value.value}).then(res => {
-                console.log(res)
                 this.typeThree = []
                 if (res.data.data) {
                     res.data.data.forEach(item => {
@@ -242,7 +241,6 @@ export default {
         },
         // 三类目录变化
         ChangeTypeThree (value) {
-            console.log(this.formData)
             if (!value) return
             this.formData.typeThree = value.label
             this.formData.typeThreeId = value.value
@@ -254,7 +252,6 @@ export default {
                     imgUrl: []
                 }
                 this.defaultImg = []
-                console.log(this.formData)
                 if (this.formData.imgUrl) {
                     this.formData.imgUrl.forEach(item => {
                         this.defaultImg.push({
@@ -263,7 +260,6 @@ export default {
                         })
                     })
                 }
-                console.log(this.defaultImg)
                 // 通过一级目录查询二级目录
                 await new Promise((resolve, reject) => {
                     getTypeTwo({typeOneId: this.formData.typeOneId}).then(res => {

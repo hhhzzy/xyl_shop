@@ -33,19 +33,26 @@ exports.upsertGoods = async (ctx, next) => {
  */
 exports.findGoods = async (ctx, next) => {
     let param = ctx.request.body;
-    const regTitle = param.title ? {$regex: new RegExp(param.title, 'i')} :''; //不区分大小写
-    const regTypeOne = param.typeOne ? {$regex: new RegExp(param.typeOne, 'i')} :''; //不区分大小写
+    const regTitle = {$regex: new RegExp(param.title, 'i')}; //不区分大小写
+    const regTypeOne ={$regex: new RegExp(param.typeOne, 'i')}; //不区分大小写
+    const regTypeTwo = {$regex: new RegExp(param.typeTwo, 'i')}; //不区分大小写
+    const regTypeThree ={$regex: new RegExp(param.typeThree, 'i')}; //不区分大小写
+    const reg = new RegExp(param, 'i'); //不区分大小写
     let conditions = {};
-    if(!param.title && !param.typeOne){
+    if(!param.title && !param.typeOne && !param.typeTwo && !param.typeThree){
         conditions = {};
     }else{
+        let cod = [];
+        if(param.title) cod.push({title:  regTitle})
+        if(param.typeOne) cod.push({typeOne: regTypeOne})
+        if(param.typeTwo) cod.push({typeTwo: regTypeTwo})
+        if(param.typeThree) cod.push({typeThree: regTypeThree})
         conditions = {
-            $or:[
-                {title: regTitle},
-                {typeOne: regTypeOne}
-            ]
+            $and: cod
         }
     }
+    console.log(conditions,'999')
+    console.log(param,'888')
     let fields = null; 
     let options = {};
     let page = param.page || 0;

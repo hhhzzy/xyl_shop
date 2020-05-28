@@ -5,8 +5,18 @@
                 <Col span="24">
                 <Form :label-width="80" inline>
                     <FormItem label="一级类别：" >
-                        <Select v-model="searchData.typeOne" clearable placeholder="请选择一类目录" style="width:200px;">
-                            <Option v-for="(item,index) in typeOne" :value="item" :key="index">{{ item }}</Option>
+                        <Select v-model="searchData.typeOneId" placeholder="请选择一类目录" label-in-value  clearable @on-change="ChangeTypeOne" style="width:200px;">
+                            <Option v-for="(item,index) in typeOne" :value="item._id" :key="index">{{ item.typeOne }}</Option>
+                        </Select>
+                    </FormItem>
+                    <FormItem label="二级类别：" >
+                        <Select v-model="searchData.typeTwoId" placeholder="请选择二类目录" label-in-value clearable @on-change="ChangeTypeTwo" style="width:200px;">
+                            <Option v-for="(item,index) in typeTwo" :value="item._id" :key="index">{{ item.typeTwo }}</Option>
+                        </Select>
+                    </FormItem>
+                    <FormItem label="三类目录：">
+                        <Select v-model="searchData.typeThreeId" placeholder="请选择三类目录" label-in-value clearable @on-change="ChangeTypeThree" style="width:200px;">
+                            <Option v-for="(item,index) in typeThree" :value="item._id" :key="index">{{ item.typeThree }}</Option>
                         </Select>
                     </FormItem>
                     <FormItem label="名称：">
@@ -28,7 +38,7 @@
     </div>
 </template>
 <script>
-import { getTypeOne } from '@/api/dictionary'
+import { getTypeOne, getTypeTwo, getTypeThree } from '@/api/dictionary'
 import { findGoods, delGoods } from '@/api/goods'
 import { formatDateTime } from '@/global/global'
 import configInfo from '@/config/index.js'
@@ -61,6 +71,10 @@ export default {
                     key: 'typeTwo'
                 },
                 {
+                    title: '三级类目',
+                    key: 'typeThree'
+                },
+                {
                     title: '简介',
                     key: 'summary'
                 },
@@ -68,7 +82,6 @@ export default {
                     title: '图片',
                     key: 'imgUrl',
                     render: (h, params) => {
-                        console.log(params)
                         var imgArr = params.row.imgUrl
                         return h('span', imgArr.map((item) => {
                             return h('img', {
@@ -152,7 +165,9 @@ export default {
             tableData: [],
             total: null,
             pageOtp: [10, 20, 30, 40],
-            typeOne: []
+            typeOne: [],
+            typeTwo: [],
+            typeThree: []
         }
     },
     created () {
@@ -163,6 +178,62 @@ export default {
         this.GetTypeOne()
     },
     methods: {
+        // 一类目录变化
+        ChangeTypeOne (value) {
+            if (!value) {
+                this.searchData.typeOne = ''
+                this.searchData.typeOneId = ''
+                return
+            }
+            this.searchData.typeOne = value.label
+            this.searchData.typeOneId = value.value
+            this.searchData.typeTwoId = ''
+            getTypeTwo({typeOneId: value.value}).then(res => {
+                this.typeTwo = []
+                if (res.data.data) {
+                    res.data.data.forEach(item => {
+                        this.typeTwo.push({
+                            _id: item._id,
+                            typeTwo: item.typeTwo
+                        })
+                    })
+                }
+            })
+        },
+        // 二类目录变化
+        ChangeTypeTwo (value) {
+            this.searchData.typeThreeId = ''
+            if (!value) {
+                this.searchData.typeTwo = ''
+                this.searchData.typeTwoId = ''
+                this.searchData.typeThree = ''
+                this.searchData.typeThreeId = ''
+                return
+            }
+            this.searchData.typeTwo = value.label
+            this.searchData.typeTwoId = value.value
+            getTypeThree({typeTwoId: value.value}).then(res => {
+                this.typeThree = []
+                if (res.data.data) {
+                    res.data.data.forEach(item => {
+                        this.typeThree.push({
+                            _id: item._id,
+                            typeThree: item.typeThree
+                        })
+                    })
+                }
+            })
+        },
+        // 三类目录变化
+        ChangeTypeThree (value) {
+            if (!value) {
+                this.searchData.typeThree = ''
+                this.searchData.typeThreeId = ''
+                return
+            }
+            this.searchData.typeThree = value.label
+            this.searchData.typeThreeId = value.value
+        },
         // 查询
         GetData () {
             findGoods(this.searchData).then(res => {
@@ -177,7 +248,10 @@ export default {
                 this.typeOne = []
                 if (res.data.data) {
                     res.data.data.forEach(item => {
-                        this.typeOne.push(item.typeOne)
+                        this.typeOne.push({
+                            _id: item._id,
+                            typeOne: item.typeOne
+                        })
                     })
                 }
             })
