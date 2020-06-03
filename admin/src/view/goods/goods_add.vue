@@ -6,17 +6,17 @@
                     <Input v-model="formData.title" placeholder="请输入标题"></Input>
                 </FormItem>
                 <FormItem label="一类目录：" prop="typeOneId">
-                    <Select v-model="formData.typeOneId" placeholder="请选择一类目录" label-in-value  @on-change="ChangeTypeOne">
+                    <Select v-model="formData.typeOneId" placeholder="请选择一类目录" filterable label-in-value  @on-change="ChangeTypeOne">
                         <Option v-for="(item,index) in typeOne" :value="item._id" :key="index">{{ item.typeOne }}</Option>
                     </Select>
                 </FormItem>
                 <FormItem label="二类目录：" prop="typeTwoId" >
-                    <Select v-model="formData.typeTwoId" placeholder="请选择二类目录" label-in-value @on-change="ChangeTypeTwo">
+                    <Select v-model="formData.typeTwoId" placeholder="请选择二类目录" filterable label-in-value @on-change="ChangeTypeTwo">
                         <Option v-for="(item,index) in typeTwo" :value="item._id" :key="index">{{ item.typeTwo }}</Option>
                     </Select>
                 </FormItem>
                 <FormItem label="三类目录：" prop="typeThreeId">
-                    <Select v-model="formData.typeThreeId" placeholder="请选择三类目录" label-in-value @on-change="ChangeTypeThree" ref="typeThree">
+                    <Select v-model="formData.typeThreeId" placeholder="请选择三类目录" filterable label-in-value @on-change="ChangeTypeThree" ref="typeThree">
                         <Option v-for="(item,index) in typeThree" :value="item._id" :key="index">{{ item.typeThree }}</Option>
                     </Select>
                 </FormItem>
@@ -222,13 +222,18 @@ export default {
         },
         // 二类目录变化
         ChangeTypeTwo (value) {
+            console.log(value)
             this.formData.typeThreeId = ''
             this.formData.typeThree = ''
+            this.$nextTick(() => {
+                this.$refs.typeThree.setQuery(null)
+            })
+            console.log(this.$refs.typeThree)
             if (!value) return
             this.formData.typeTwo = value.label
             this.formData.typeTwoId = value.value
+            this.typeThree = []
             getTypeThree({typeTwoId: value.value}).then(res => {
-                this.typeThree = []
                 if (res.data.data) {
                     res.data.data.forEach(item => {
                         this.typeThree.push({

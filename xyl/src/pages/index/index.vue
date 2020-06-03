@@ -319,9 +319,15 @@ export default {
         }
     },
     mounted(){
-        wx.showShareMenu({
-            withShareTicket: true
-        })  
+    },
+    onShareAppMessage: (res) => {
+        if(res.from == 'menu'){
+            return {
+                title: '源升建材',
+                // imageUrl: '', // 图片 URL
+                // path: "/pages/index/main?parentMemberId="+store.state.user.userInfo.id
+            };
+        }
     },
     async onShow(){
         await this.GetTypeOne();

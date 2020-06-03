@@ -1,8 +1,8 @@
 // http.js
 import axios from 'axios'
 // import store from '../store'
-// const url = 'https://www.ysjiancai.cn/web/'; // 正式环境地质
-const url = 'http://localhost:3005/web/'; // 测试环境地质
+const url = 'https://www.ysjiancai.cn/web/'; // 正式环境地质
+// const url = 'http://localhost:3005/web/'; // 测试环境地质
 const ajax = axios.create({
     baseURL: url, // 请求地址
     timeout: 30000 // 请求超时

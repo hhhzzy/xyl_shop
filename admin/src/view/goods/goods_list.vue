@@ -15,7 +15,7 @@
                         </Select>
                     </FormItem>
                     <FormItem label="三类目录：">
-                        <Select v-model="searchData.typeThreeId" placeholder="请选择三类目录" label-in-value clearable @on-change="ChangeTypeThree" style="width:200px;">
+                        <Select v-model="searchData.typeThreeId" placeholder="请选择三类目录" label-in-value clearable @on-change="ChangeTypeThree" style="width:200px;" ref="typeThree">
                             <Option v-for="(item,index) in typeThree" :value="item._id" :key="index">{{ item.typeThree }}</Option>
                         </Select>
                     </FormItem>
@@ -203,6 +203,10 @@ export default {
         // 二类目录变化
         ChangeTypeTwo (value) {
             this.searchData.typeThreeId = ''
+            this.$nextTick(() => {
+                this.$refs.typeThree.setQuery(null)
+                this.$refs.typeThree.clearSingleSelect()
+            })
             if (!value) {
                 this.searchData.typeTwo = ''
                 this.searchData.typeTwoId = ''
@@ -212,8 +216,8 @@ export default {
             }
             this.searchData.typeTwo = value.label
             this.searchData.typeTwoId = value.value
+            this.typeThree = []
             getTypeThree({typeTwoId: value.value}).then(res => {
-                this.typeThree = []
                 if (res.data.data) {
                     res.data.data.forEach(item => {
                         this.typeThree.push({
@@ -222,10 +226,12 @@ export default {
                         })
                     })
                 }
+                console.log(this.typeThree)
             })
         },
         // 三类目录变化
         ChangeTypeThree (value) {
+            console.log(value)
             if (!value) {
                 this.searchData.typeThree = ''
                 this.searchData.typeThreeId = ''
