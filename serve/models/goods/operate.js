@@ -31,13 +31,57 @@ module.exports = {
         return new Promise((resolve, reject) => {
             console.log(conditions)
             //model.find(需要查找的对象(如果为空，则查找到所有数据), 属性过滤对象[可选参数], options[可选参数], callback)
-            goodsModel.find(conditions, fields, options).skip((page-1)*num).limit(num).sort({created:-1}).exec( (error, doc) => {
+            // goodsModel.find(conditions, fields, options).skip((page-1)*num).limit(num).sort({created:-1}).exec( (error, doc) => {
+            //     if (error) {
+            //         reject(error)
+            //     } else {
+            //         resolve(doc)
+            //     }
+            // });
+            goodsModel.aggregate([
+                {
+                    $project:
+                    {
+                        "id": 1,
+                        "sortNumber": 1,
+                        "typeOne":1,
+                        "typeOneId":1,
+                        "typeTwo":1,
+                        "typeTwoId":1,
+                        "typeThree":1,
+                        "typeThreeId":1,
+                        "created": 1,
+                        "stock":1,
+                        "price":1,
+                        "imgUrl":1,
+                        "title":1,
+                        sortValue: {
+                            $cond: {
+                            if: { $eq: ['$sortNumber', null] },
+                                then: 0,
+                                else: 1,
+                            },
+                        }
+                    }
+                },
+                {
+                    $sort:
+                    {
+                      "sortValue": -1,
+                      "sortNumber": 1,
+                      "created": -1
+                    }
+                },
+                {$match:conditions},
+                {$skip: (page-1)*num},
+                {$limit: num}
+            ],(error, doc) => {
                 if (error) {
                     reject(error)
                 } else {
                     resolve(doc)
                 }
-            });
+            })
         })
     },
     /**

@@ -79,6 +79,10 @@ export default {
                     key: 'summary'
                 },
                 {
+                    title: '排序号',
+                    key: 'sortNumber'
+                },
+                {
                     title: '图片',
                     key: 'imgUrl',
                     render: (h, params) => {

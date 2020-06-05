@@ -26,7 +26,7 @@
                             :desc="item.summary"
                             :title="item.title"
                             :price="item.price"
-                            :thumb="imgBaseUrl+item.imgUrl[0].path"
+                            :thumb="item.imgUrl[0]?imgBaseUrl+item.imgUrl[0].path:'../../../static/images/mr.png'"
                             v-for="(item,index) in GoodsArr"
                             :key="index"
                             @click="ShowBigImg(item)"
@@ -220,12 +220,17 @@ export default {
                             }
                             
                         }else {
-                            if(this.breadArr.length < 3){
-                                this.breadArr.push({
-                                    label:currentObj.typeTwo,
-                                    _id:currentObj.typeTwoId,
-                                })
+                            // if(this.breadArr.length < 3){
+                            //     this.breadArr.push({
+                            //         label:currentObj.typeTwo,
+                            //         _id:currentObj.typeTwoId,
+                            //     })
+                            // }
+                            this.breadArr[2] = {
+                                label:currentObj.typeTwo,
+                                _id:currentObj._id,
                             }
+                            console.log(currentObj,this.breadArr)
                         }
                         this.searchData.typeOne = currentObj.typeOne;
                         this.searchData.typeTwo = currentObj.typeTwo;
@@ -446,14 +451,14 @@ export default {
     swiper{
         position: relative;
         width: 300px;
-        height: 300px;
+        height: 400px;
         left:50%;
         top:50%;
         transform: translate(-50%,-50%);
     }
     img{
         width: 300px;
-        height: 300px;
+        height: 400px;
         position: relative;
     }
 }

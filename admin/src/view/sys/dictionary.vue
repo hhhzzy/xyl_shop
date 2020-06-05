@@ -50,6 +50,9 @@
                         <FormItem label="三类目录" prop="typeThree" v-if="typeName == 'type_three'">
                             <Input v-model="formValidate.typeThree" ></Input>
                         </FormItem>
+                        <FormItem label="排序号">
+                            <Input v-model="formValidate.sortNumber" ></Input>
+                        </FormItem>
                     </Form>
             </Modal>
         </div>
@@ -96,6 +99,10 @@ export default {
                 {
                     title: '一类目录',
                     key: 'typeOne'
+                },
+                {
+                    title: '排序号',
+                    key: 'sortNumber'
                 },
                 {
                     title: '创建时间',
@@ -171,6 +178,10 @@ export default {
                 {
                     title: '二类目录',
                     key: 'typeTwo'
+                },
+                {
+                    title: '排序号',
+                    key: 'sortNumber'
                 },
                 {
                     title: '创建时间',
@@ -251,6 +262,10 @@ export default {
                 {
                     title: '三类目录',
                     key: 'typeThree'
+                },
+                {
+                    title: '排序号',
+                    key: 'sortNumber'
                 },
                 {
                     title: '创建时间',
@@ -380,6 +395,7 @@ export default {
                     if (this.typeName === 'type_one') {
                         formData = {
                             typeOne: this.formValidate.typeOne,
+                            sortNumber: this.formValidate.sortNumber ? this.formValidate.sortNumber : null,
                             _id: this.formValidate._id
                         }
                         // 新增修改一类目录
@@ -398,6 +414,7 @@ export default {
                         formData = {
                             typeOne: this.formValidate.typeOne,
                             typeOneId: this.formValidate.typeOneId,
+                            sortNumber: this.formValidate.sortNumber ? this.formValidate.sortNumber : null,
                             typeTwo: this.formValidate.typeTwo
                         }
                         if (this.formValidate._id) {
@@ -424,6 +441,7 @@ export default {
                             typeTwoId: this.formValidate.typeTwoId,
                             typeThree: this.formValidate.typeThree,
                             typeOne: this.formValidate.typeOne,
+                            sortNumber: this.formValidate.sortNumber ? this.formValidate.sortNumber : null,
                             typeOneId: this.formValidate.typeOneId
                         }
                         if (this.formValidate._id) {

@@ -10,17 +10,17 @@
                         <Option v-for="(item,index) in typeOne" :value="item._id" :key="index">{{ item.typeOne }}</Option>
                     </Select>
                 </FormItem>
-                <FormItem label="二类目录：" prop="typeTwoId" >
+                <FormItem label="二类目录：" >
                     <Select v-model="formData.typeTwoId" placeholder="请选择二类目录" filterable label-in-value @on-change="ChangeTypeTwo">
                         <Option v-for="(item,index) in typeTwo" :value="item._id" :key="index">{{ item.typeTwo }}</Option>
                     </Select>
                 </FormItem>
-                <FormItem label="三类目录：" prop="typeThreeId">
+                <FormItem label="三类目录：">
                     <Select v-model="formData.typeThreeId" placeholder="请选择三类目录" filterable label-in-value @on-change="ChangeTypeThree" ref="typeThree">
                         <Option v-for="(item,index) in typeThree" :value="item._id" :key="index">{{ item.typeThree }}</Option>
                     </Select>
                 </FormItem>
-                <FormItem label="商品简介：" prop="summary">
+                <FormItem label="商品简介：">
                     <Input type="textarea" v-model="formData.summary" placeholder="请输入商品简介"></Input>
                 </FormItem>
                 <FormItem label="图片：">
@@ -53,9 +53,9 @@
                 <FormItem label="价格：">
                     <Input v-model="formData.price" placeholder="请输入价格"></Input>
                 </FormItem>
-                <!-- <FormItem label="排序：">
-                    <Input v-model="formData.sortIndex" placeholder="请输入排序号"></Input>
-                </FormItem> -->
+                <FormItem label="排序：">
+                    <Input v-model="formData.sortNumber" placeholder="请输入排序号"></Input>
+                </FormItem>
                 <FormItem>
                     <Button type="primary" @click="handleSubmit('formData')">提交</Button>
                     <Button  @click="handleReset('formData')" style="margin-left: 8px">重置</Button>
@@ -115,13 +115,14 @@ export default {
         handleSubmit (name) {
             this.$refs[name].validate((valid) => {
                 if (valid) {
-                    if (!this.formData.imgUrl) {
-                        this.$Message.error({
-                            background: true,
-                            content: '请上传商品图片'
-                        })
-                        return
-                    }
+                    // if (!this.formData.imgUrl) {
+                    //     this.$Message.error({
+                    //         background: true,
+                    //         content: '请上传商品图片'
+                    //     })
+                    //     return
+                    // }
+                    this.formData.sortNumber = this.formData.sortNumber ? this.formData.sortNumber : null
                     upsertGoods(this.formData)
                         .then((res) => {
                             if (!res.data.code) {
@@ -256,6 +257,7 @@ export default {
                 this.formData = res.data.data || {
                     imgUrl: []
                 }
+                console.log(this.formData)
                 this.defaultImg = []
                 if (this.formData.imgUrl) {
                     this.formData.imgUrl.forEach(item => {

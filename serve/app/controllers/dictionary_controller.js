@@ -6,6 +6,7 @@ let operateTypeThree = require('../../models/typeThree/operate');
 // 新增或修改一级类目
 exports.upsertTypeOne = async (ctx, next) => {
     let param = ctx.request.body;
+    console.log(param,'111111111111111')
     if(param.typeOne){
         if (param._id) {
             await operateTypeOne.upsert({'_id':param._id},param);

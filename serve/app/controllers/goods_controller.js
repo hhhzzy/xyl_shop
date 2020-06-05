@@ -8,8 +8,7 @@ const mongoose = require('mongoose');
  */
 exports.upsertGoods = async (ctx, next) => {
     let param = ctx.request.body;
-    console.log(param,'8888')
-    if(param.title && param.summary){
+    if(param.title){
         if (param._id) {
             await operate.upsert({'_id':param._id},param);
         } else {
@@ -51,8 +50,6 @@ exports.findGoods = async (ctx, next) => {
             $and: cod
         }
     }
-    console.log(conditions,'999')
-    console.log(param,'888')
     let fields = null; 
     let options = {};
     let page = param.page || 0;

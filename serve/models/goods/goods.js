@@ -9,7 +9,7 @@ const goodsSchema = new mongoose.Schema({
     typeTwoId: {type: String},
     typeThreeId: {type: String},
     summary: {type: String},
-    sortIndex: {type: Number},
+    sortNumber: {type: Number},
     imgUrl: [{path:String,name:String}],
     stock: {type:Number},
     price: {type:Number},

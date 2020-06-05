@@ -5,7 +5,8 @@ const dicSchema = new mongoose.Schema({
     typeTwo: { type: String },
     typeOne: { type: String },
     typeOneId: { type: String },
-    typeThree: { type: String }
+    typeThree: { type: String },
+    sortNumber: { type: Number, default: null}
 }, {timestamps: {createdAt: 'created', updatedAt: 'updated'}});
 let typeThreeModel = db.model('typethrees', dicSchema);
 module.exports = typeThreeModel;
